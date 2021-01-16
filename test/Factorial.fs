@@ -1,0 +1,13 @@
+BEGINPROG Factorial
+  READ(number)              // Read a number from user input
+  result := 1
+IF (number > -1) THEN
+  WHILE (number) > 0 DO 
+    result := result * number
+    number := number - 1   // decrease number
+  ENDWHILE
+  ELSE                      // The input number is negative
+  result := -1
+ENDIF
+PRINT(result)
+ENDPROG

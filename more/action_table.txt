@@ -1,0 +1,231 @@
+********** The Grammar **********
+Program     --> BEG Code END 
+Code        --> EPSILON 
+            --> InstList 
+InstList    --> Instruction InstTail 
+InstTail    --> SEMICOLON InstList 
+            --> EPSILON 
+Instruction --> For 
+            --> While 
+            --> Print 
+            --> Read 
+            --> Assign 
+            --> If 
+Assign      --> VARNAME ASSIGN ExprArith 
+ExprArith   --> ProdExpr ExprTail 
+ExprTail    --> EPSILON 
+            --> AddOp ProdExpr ExprTail 
+ProdExpr    --> ExprAtom ProdTail 
+ProdTail    --> EPSILON 
+            --> MultOp ExprAtom ProdTail 
+ExprAtom    --> VARNAME 
+            --> NUMBER 
+            --> MINUS ExprAtom 
+            --> LEFTPARENTHESIS ExprArith RIGHTPARENTHESIS 
+AddOp       --> PLUS 
+            --> MINUS 
+MultOp      --> TIMES 
+            --> DIVIDE 
+Cond        --> AndExpr CondTail 
+CondTail    --> OR AndExpr CondTail 
+            --> EPSILON 
+AndExpr     --> CondAtom AndTail 
+AndTail     --> AND CondAtom AndTail 
+            --> EPSILON 
+CondAtom    --> ExprArith Comp ExprArith 
+            --> NOT CondAtom 
+If          --> IF Cond THEN Code MaybeElse 
+MaybeElse   --> ELSE Code ENDIF 
+            --> ENDIF 
+Comp        --> SMALLER 
+            --> DIFFERENT 
+            --> SMALLEREQUAL 
+            --> GREATER 
+            --> GREATEREQUAL 
+            --> EQUAL 
+While       --> WHILE Cond DO Code ENDWHILE 
+For         --> FOR VARNAME FROM ExprArith BY ExprArith TO ExprArith DO Code ENDWHILE 
+Print       --> PRINT LEFTPARENTHESIS VARNAME RIGHTPARENTHESIS 
+Read        --> READ LEFTPARENTHESIS VARNAME RIGHTPARENTHESIS 
+
+********** First **********
+Program     | BEG
+Code        | VARNAME, IF, WHILE, FOR, PRINT, READ, EPSILON
+Instruction | VARNAME, IF, WHILE, FOR, PRINT, READ
+InstList    | VARNAME, IF, WHILE, FOR, PRINT, READ
+InstTail    | SEMICOLON, EPSILON
+Assign      | VARNAME
+ExprArith   | VARNAME, NUMBER, LEFTPARENTHESIS, MINUS
+ExprTail    | MINUS, PLUS, EPSILON
+ProdExpr    | VARNAME, NUMBER, LEFTPARENTHESIS, MINUS
+ProdTail    | TIMES, DIVIDE, EPSILON
+ExprAtom    | VARNAME, NUMBER, LEFTPARENTHESIS, MINUS
+AddOp       | MINUS, PLUS
+MultOp      | TIMES, DIVIDE
+Cond        | VARNAME, NUMBER, LEFTPARENTHESIS, MINUS, NOT
+CondTail    | OR, EPSILON
+AndExpr     | VARNAME, NUMBER, LEFTPARENTHESIS, MINUS, NOT
+AndTail     | AND, EPSILON
+CondAtom    | VARNAME, NUMBER, LEFTPARENTHESIS, MINUS, NOT
+If          | IF
+MaybeElse   | ENDIF, ELSE
+Comp        | EQUAL, GREATEREQUAL, GREATER, SMALLEREQUAL, SMALLER, DIFFERENT
+While       | WHILE
+For         | FOR
+Print       | PRINT
+Read        | READ
+
+********** Follow **********
+Program     | 
+Code        | END, ENDIF, ELSE, ENDWHILE
+Instruction | END, SEMICOLON, ENDIF, ELSE, ENDWHILE, EPSILON
+InstList    | END, ENDIF, ELSE, ENDWHILE
+InstTail    | END, ENDIF, ELSE, ENDWHILE
+Assign      | END, SEMICOLON, ENDIF, ELSE, ENDWHILE, EPSILON
+ExprArith   | END, SEMICOLON, RIGHTPARENTHESIS, THEN, ENDIF, ELSE, AND, OR, EQUAL, GREATEREQUAL, GREATER, SMALLEREQUAL, SMALLER, DIFFERENT, DO, ENDWHILE, BY, TO, EPSILON
+ExprTail    | END, SEMICOLON, RIGHTPARENTHESIS, THEN, ENDIF, ELSE, AND, OR, EQUAL, GREATEREQUAL, GREATER, SMALLEREQUAL, SMALLER, DIFFERENT, DO, ENDWHILE, BY, TO, EPSILON
+ProdExpr    | END, SEMICOLON, RIGHTPARENTHESIS, MINUS, PLUS, THEN, ENDIF, ELSE, AND, OR, EQUAL, GREATEREQUAL, GREATER, SMALLEREQUAL, SMALLER, DIFFERENT, DO, ENDWHILE, BY, TO, EPSILON
+ProdTail    | END, SEMICOLON, RIGHTPARENTHESIS, MINUS, PLUS, THEN, ENDIF, ELSE, AND, OR, EQUAL, GREATEREQUAL, GREATER, SMALLEREQUAL, SMALLER, DIFFERENT, DO, ENDWHILE, BY, TO, EPSILON
+ExprAtom    | END, SEMICOLON, RIGHTPARENTHESIS, MINUS, PLUS, TIMES, DIVIDE, THEN, ENDIF, ELSE, AND, OR, EQUAL, GREATEREQUAL, GREATER, SMALLEREQUAL, SMALLER, DIFFERENT, DO, ENDWHILE, BY, TO, EPSILON
+AddOp       | VARNAME, NUMBER, LEFTPARENTHESIS, MINUS
+MultOp      | VARNAME, NUMBER, LEFTPARENTHESIS, MINUS
+Cond        | THEN, DO
+CondTail    | THEN, DO
+AndExpr     | THEN, OR, DO, EPSILON
+AndTail     | THEN, OR, DO, EPSILON
+CondAtom    | THEN, AND, OR, DO, EPSILON
+If          | END, SEMICOLON, ENDIF, ELSE, ENDWHILE, EPSILON
+MaybeElse   | END, SEMICOLON, ENDIF, ELSE, ENDWHILE, EPSILON
+Comp        | VARNAME, NUMBER, LEFTPARENTHESIS, MINUS
+While       | END, SEMICOLON, ENDIF, ELSE, ENDWHILE, EPSILON
+For         | END, SEMICOLON, ENDIF, ELSE, ENDWHILE, EPSILON
+Print       | END, SEMICOLON, ENDIF, ELSE, ENDWHILE, EPSILON
+Read        | END, SEMICOLON, ENDIF, ELSE, ENDWHILE, EPSILON
+null        | EPSILON
+
+********** Action table **********
+[Program    , BEG      ] : BEG Code END
+[Code       , VARNAME  ] : InstList
+[Code       , END      ] : EPSILON
+[Code       , IF       ] : InstList
+[Code       , ENDIF    ] : EPSILON
+[Code       , ELSE     ] : EPSILON
+[Code       , WHILE    ] : InstList
+[Code       , ENDWHILE ] : EPSILON
+[Code       , FOR      ] : InstList
+[Code       , PRINT    ] : InstList
+[Code       , READ     ] : InstList
+[Instruction, VARNAME  ] : Assign
+[Instruction, IF       ] : If
+[Instruction, WHILE    ] : While
+[Instruction, FOR      ] : For
+[Instruction, PRINT    ] : Print
+[Instruction, READ     ] : Read
+[InstList   , VARNAME  ] : Instruction InstTail
+[InstList   , IF       ] : Instruction InstTail
+[InstList   , WHILE    ] : Instruction InstTail
+[InstList   , FOR      ] : Instruction InstTail
+[InstList   , PRINT    ] : Instruction InstTail
+[InstList   , READ     ] : Instruction InstTail
+[InstTail   , END      ] : EPSILON
+[InstTail   , SEMICOLON] : SEMICOLON InstList
+[InstTail   , ENDIF    ] : EPSILON
+[InstTail   , ELSE     ] : EPSILON
+[InstTail   , ENDWHILE ] : EPSILON
+[Assign     , VARNAME  ] : VARNAME ASSIGN ExprArith
+[ExprArith  , VARNAME  ] : ProdExpr ExprTail
+[ExprArith  , NUMBER   ] : ProdExpr ExprTail
+[ExprArith  , LEFTPARENTHESIS] : ProdExpr ExprTail
+[ExprArith  , MINUS    ] : ProdExpr ExprTail
+[ExprTail   , END      ] : EPSILON
+[ExprTail   , SEMICOLON] : EPSILON
+[ExprTail   , RIGHTPARENTHESIS] : EPSILON
+[ExprTail   , MINUS    ] : AddOp ProdExpr ExprTail
+[ExprTail   , PLUS     ] : AddOp ProdExpr ExprTail
+[ExprTail   , THEN     ] : EPSILON
+[ExprTail   , ENDIF    ] : EPSILON
+[ExprTail   , ELSE     ] : EPSILON
+[ExprTail   , AND      ] : EPSILON
+[ExprTail   , OR       ] : EPSILON
+[ExprTail   , EQUAL    ] : EPSILON
+[ExprTail   , GREATEREQUAL] : EPSILON
+[ExprTail   , GREATER  ] : EPSILON
+[ExprTail   , SMALLEREQUAL] : EPSILON
+[ExprTail   , SMALLER  ] : EPSILON
+[ExprTail   , DIFFERENT] : EPSILON
+[ExprTail   , DO       ] : EPSILON
+[ExprTail   , ENDWHILE ] : EPSILON
+[ExprTail   , BY       ] : EPSILON
+[ExprTail   , TO       ] : EPSILON
+[ExprTail   , EPSILON  ] : EPSILON
+[ProdExpr   , VARNAME  ] : ExprAtom ProdTail
+[ProdExpr   , NUMBER   ] : ExprAtom ProdTail
+[ProdExpr   , LEFTPARENTHESIS] : ExprAtom ProdTail
+[ProdExpr   , MINUS    ] : ExprAtom ProdTail
+[ProdTail   , END      ] : EPSILON
+[ProdTail   , SEMICOLON] : EPSILON
+[ProdTail   , RIGHTPARENTHESIS] : EPSILON
+[ProdTail   , MINUS    ] : EPSILON
+[ProdTail   , PLUS     ] : EPSILON
+[ProdTail   , TIMES    ] : MultOp ExprAtom ProdTail
+[ProdTail   , DIVIDE   ] : MultOp ExprAtom ProdTail
+[ProdTail   , THEN     ] : EPSILON
+[ProdTail   , ENDIF    ] : EPSILON
+[ProdTail   , ELSE     ] : EPSILON
+[ProdTail   , AND      ] : EPSILON
+[ProdTail   , OR       ] : EPSILON
+[ProdTail   , EQUAL    ] : EPSILON
+[ProdTail   , GREATEREQUAL] : EPSILON
+[ProdTail   , GREATER  ] : EPSILON
+[ProdTail   , SMALLEREQUAL] : EPSILON
+[ProdTail   , SMALLER  ] : EPSILON
+[ProdTail   , DIFFERENT] : EPSILON
+[ProdTail   , DO       ] : EPSILON
+[ProdTail   , ENDWHILE ] : EPSILON
+[ProdTail   , BY       ] : EPSILON
+[ProdTail   , TO       ] : EPSILON
+[ProdTail   , EPSILON  ] : EPSILON
+[ExprAtom   , VARNAME  ] : VARNAME
+[ExprAtom   , NUMBER   ] : NUMBER
+[ExprAtom   , LEFTPARENTHESIS] : LEFTPARENTHESIS ExprArith RIGHTPARENTHESIS
+[ExprAtom   , MINUS    ] : MINUS ExprAtom
+[AddOp      , MINUS    ] : MINUS
+[AddOp      , PLUS     ] : PLUS
+[MultOp     , TIMES    ] : TIMES
+[MultOp     , DIVIDE   ] : DIVIDE
+[Cond       , VARNAME  ] : AndExpr CondTail
+[Cond       , NUMBER   ] : AndExpr CondTail
+[Cond       , LEFTPARENTHESIS] : AndExpr CondTail
+[Cond       , MINUS    ] : AndExpr CondTail
+[Cond       , NOT      ] : AndExpr CondTail
+[CondTail   , THEN     ] : EPSILON
+[CondTail   , OR       ] : OR AndExpr CondTail
+[CondTail   , DO       ] : EPSILON
+[AndExpr    , VARNAME  ] : CondAtom AndTail
+[AndExpr    , NUMBER   ] : CondAtom AndTail
+[AndExpr    , LEFTPARENTHESIS] : CondAtom AndTail
+[AndExpr    , MINUS    ] : CondAtom AndTail
+[AndExpr    , NOT      ] : CondAtom AndTail
+[AndTail    , THEN     ] : EPSILON
+[AndTail    , AND      ] : AND CondAtom AndTail
+[AndTail    , OR       ] : EPSILON
+[AndTail    , DO       ] : EPSILON
+[AndTail    , EPSILON  ] : EPSILON
+[CondAtom   , VARNAME  ] : ExprArith Comp ExprArith
+[CondAtom   , NUMBER   ] : ExprArith Comp ExprArith
+[CondAtom   , LEFTPARENTHESIS] : ExprArith Comp ExprArith
+[CondAtom   , MINUS    ] : ExprArith Comp ExprArith
+[CondAtom   , NOT      ] : NOT CondAtom
+[If         , IF       ] : IF Cond THEN Code MaybeElse
+[MaybeElse  , ENDIF    ] : ENDIF
+[MaybeElse  , ELSE     ] : ELSE Code ENDIF
+[Comp       , EQUAL    ] : EQUAL
+[Comp       , GREATEREQUAL] : GREATEREQUAL
+[Comp       , GREATER  ] : GREATER
+[Comp       , SMALLEREQUAL] : SMALLEREQUAL
+[Comp       , SMALLER  ] : SMALLER
+[Comp       , DIFFERENT] : DIFFERENT
+[While      , WHILE    ] : WHILE Cond DO Code ENDWHILE
+[For        , FOR      ] : FOR VARNAME FROM ExprArith BY ExprArith TO ExprArith DO Code ENDWHILE
+[Print      , PRINT    ] : PRINT LEFTPARENTHESIS VARNAME RIGHTPARENTHESIS
+[Read       , READ     ] : READ LEFTPARENTHESIS VARNAME RIGHTPARENTHESIS
